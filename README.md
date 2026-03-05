@@ -11,6 +11,9 @@ files used by **Sigma Metalytics Precious Metal Verifier (PMV)** devices.
 pip install pycryptodome
 ```
 
+> If `pip` is not found or you get an error, see the official installation
+> guide: [pip.pypa.io/en/stable/installation](https://pip.pypa.io/en/stable/installation/)
+
 1. Download your device's latest `.dat` file from the
    [Sigma Metalytics database updater page](https://www.sigmametalytics.com/pages/database-updaters).
 2. Open it:
