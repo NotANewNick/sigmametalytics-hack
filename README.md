@@ -1,7 +1,7 @@
 # PMV Database Editor
 
 A Python tool for reading, editing, and creating the encrypted `.dat` database
-files used by **Sigma Metalytics Precious Metal Verifier (PMV)** devices. [https://www.sigmametalytics.com]([url](https://www.sigmametalytics.com))
+files used by **Sigma Metalytics Precious Metal Verifier (PMV)** devices. [https://www.sigmametalytics.com](https://www.sigmametalytics.com))
 
 ---
 
