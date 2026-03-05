@@ -1,0 +1,2 @@
+pycryptodome>=3.0    # AES encryption/decryption (required)
+dnfile>=0.14.0       # .NET assembly parsing for --extract-key (optional)
