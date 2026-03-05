@@ -48,23 +48,65 @@ python pmv_editor.py --extract-key InvestorDatabaseDownloader.exe
 When a file is opened, a text menu is shown:
 
 ```
-───────────────────────────────────────────────────
+───────────────────────────────────────────────────────────────────────────────
   DATABASE: Invest 1.15  (49 records)
-───────────────────────────────────────────────────
-  l  List all records
-  v  View a record
-  e  Edit a record
-  a  Add a new record
-  d  Delete a record
-  c  Copy/duplicate a record
-  h  Edit database header (description / timestamp)
-  s  Save to current file
-  w  Save to a different file
-  q  Quit
+───────────────────────────────────────────────────────────────────────────────
+  l              List all records in the database
+  v [#]          View all fields of one record in detail
+  e [#]          Edit the fields of one record
+  a              Add a brand-new record to the database
+  d [#]          Delete a record permanently
+  c [#]          Duplicate a record as a starting point for a new one
+  s              Save all changes back to the current file
+  w              Save all changes to a different file (leaves original intact)
+  q              Quit — you will be warned if there are unsaved changes
+
+  Tip: for v, e, d and c you can include the record number directly,
+       e.g.  'v 5'  or  'e 12'  to skip the list step.
 ```
 
 Changes are tracked in memory until you save.  You will be warned if you try
 to quit with unsaved changes.
+
+### List (`l`)
+
+Displays every record as a single wide table with all columns visible —
+record number, name, category, and all 9 measurement fields.
+
+### View (`v [#]`)
+
+Shows the full detail of one record as a table with field names in the header
+row and values in the data row.  You can include the record number directly in
+the command (e.g. `v 5`) to skip the list step.
+
+### Edit (`e [#]`)
+
+Steps through every field of a record one at a time.  Press Enter to keep the
+current value, or type a new one.  You can include the record number directly
+(e.g. `e 12`).
+
+### Add (`a`)
+
+Prompts you for all fields of a new record, then asks where in the list to
+insert it (default: at the end).
+
+### Delete (`d [#]`)
+
+Shows the full record detail first so you can confirm what will be removed,
+then asks for confirmation before deleting.  This cannot be undone without
+reloading from the original file.  You can include the record number directly
+(e.g. `d 3`).
+
+### Copy (`c [#]`)
+
+Duplicates an existing record and inserts it immediately after the original,
+named `<original name> (copy)`.  Use `e` afterwards to rename and adjust the
+copy.  You can include the record number directly (e.g. `c 7`).
+
+### Save (`s`) and Save as (`w`)
+
+`s` overwrites the file that was originally opened.  `w` prompts for a new
+filename, leaving the original file untouched.
 
 ---
 
@@ -76,7 +118,7 @@ python pmv_editor.py [options] [file.dat]
 
 | Option | Description |
 |---|---|
-| *(no arguments)* | Opens `Invest1.15.dat` in the current directory |
+| *(no arguments)* | Prompts you to enter a `.dat` file path |
 | `file.dat` | Opens the specified `.dat` file |
 | `--new [file.dat]` | Creates a blank database (default name: `new_database.dat`) |
 | `--extract-key exe` | Extracts the AES key and IV from the downloader `.exe` |
