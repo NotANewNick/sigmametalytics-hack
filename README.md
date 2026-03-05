@@ -17,6 +17,45 @@ tool works on all of them without any configuration.
 
 ---
 
+## Disclaimer
+
+This software is provided **as is**, without warranty of any kind.  The
+authors accept no responsibility for any consequences arising from its use,
+including but not limited to: incorrect database entries, device malfunction,
+failed authentication of genuine metals, or acceptance of counterfeit items.
+
+Always verify results independently before relying on any PMV device for
+high-value transactions.  Use this tool at your own risk.
+
+---
+
+## Important: the database is a full replacement
+
+> **Warning — loading a modified `.dat` file onto your PMV device will
+> completely erase and replace the device's existing database.**
+
+The `.dat` file is not a patch or a set of updates — it is the entire database
+in one file.  When the device loads a new file, every record that was
+previously stored on the device is gone and replaced by whatever is in the
+new file.
+
+**What this means in practice:**
+
+- **Always start from an existing official database.**  Download the latest
+  official `.dat` file for your device from the
+  [Sigma Metalytics website](https://www.sigmametalytics.com/pages/database-updaters),
+  open it with this tool, add or edit your records, and then save and load the
+  result.  This way all the factory-calibrated entries are preserved alongside
+  your custom ones.
+
+- **A backup is created automatically every time you save.**  The first time
+  you press `s` in a session, the tool writes a copy of the originally loaded
+  file to `Backup-<original filename>` in the same directory before overwriting
+  anything.  If you ever need to restore the previous state, the backup file
+  will be there.
+
+---
+
 ## Requirements
 
 Python 3.8 or newer.
@@ -33,9 +72,6 @@ pip install dnfile              # only needed for --extract-key
 ```bash
 # Open and edit a database interactively
 python pmv_editor.py MyDatabase.dat
-
-# Create a new blank database
-python pmv_editor.py --new MyNewDatabase.dat
 
 # Extract key/IV from the Windows downloader if the key has changed
 python pmv_editor.py --extract-key InvestorDatabaseDownloader.exe
@@ -54,11 +90,10 @@ When a file is opened, a text menu is shown:
   l              List all records in the database
   v [#]          View all fields of one record in detail
   e [#]          Edit the fields of one record
-  a              Add a brand-new record to the database
+  n              Add a new metal record (guided wizard)
   d [#]          Delete a record permanently
   c [#]          Duplicate a record as a starting point for a new one
-  s              Save all changes back to the current file
-  w              Save all changes to a different file (leaves original intact)
+  s              Save all changes back to the current file (auto-backup created)
   q              Quit — you will be warned if there are unsaved changes
 
   Tip: for v, e, d and c you can include the record number directly,
@@ -85,10 +120,13 @@ Steps through every field of a record one at a time.  Press Enter to keep the
 current value, or type a new one.  You can include the record number directly
 (e.g. `e 12`).
 
-### Add (`a`)
+### Add new record (`n`)
 
-Prompts you for all fields of a new record, then asks where in the list to
-insert it (default: at the end).
+A five-step guided wizard that walks you through every field needed to add a
+new metal, explaining in plain language what each value means and how to find
+it.  All values are entered manually.
+
+See **[New record wizard](#new-record-wizard)** below for full instructions.
 
 ### Delete (`d [#]`)
 
@@ -103,10 +141,195 @@ Duplicates an existing record and inserts it immediately after the original,
 named `<original name> (copy)`.  Use `e` afterwards to rename and adjust the
 copy.  You can include the record number directly (e.g. `c 7`).
 
-### Save (`s`) and Save as (`w`)
+### Save (`s`)
 
-`s` overwrites the file that was originally opened.  `w` prompts for a new
-filename, leaving the original file untouched.
+Before writing anything to disk, `s` automatically creates a backup of the
+**originally loaded file** named `Backup-<original filename>` in the same
+directory.  The backup is only created once per session — if it already exists
+it is left untouched, so it always reflects the true state of the file before
+any edits were made in this or any previous session.
+
+Example: opening `Invest 1.15.dat` and pressing `s` will produce
+`Backup-Invest 1.15.dat` alongside the saved file.
+
+---
+
+## New record wizard
+
+The `n` command opens a five-step guided wizard.  Each step explains what the
+field means and how to find the correct value.  All values are entered manually
+by the user — the wizard does not connect to the device automatically.
+
+### Before you start
+
+You will need:
+- At least one known **genuine** sample of the metal you want to add.
+  More pieces (3–5 from different sources) give a more reliable reading range.
+- The **specific gravity** (density) of the metal — see the reference table in
+  Step 5 below, or look up the published value for your specific alloy.
+- Your PMV device, to take bar readings from the genuine sample.
+
+### How the measurement bar works
+
+Every PMV device displays a measurement bar when a sample is placed on it.
+The bar is divided into colour-coded zones:
+
+```
+Red (fail) | Yellow (caution) | Green (pass) | Yellow (caution) | Red (fail)
+```
+
+A genuine sample should produce a reading that lands in the **green zone**.
+The four database threshold values define exactly where each zone boundary sits.
+The wizard asks for the range of readings you observe on genuine samples and
+calculates the boundaries for you.
+
+The device also shows a **numeric value** alongside the bar — that number is
+what you enter in Step 4.
+
+### How to read the bar value from your device
+
+#### PMV Investor
+
+1. Power on and wait for the home screen.
+2. Place the sample flat on both probes (left and right contact pads).
+3. The device runs **Basic Verification** (surface resistivity) first, then
+   **Thru Verification** (bulk resistivity).
+4. Each screen shows a horizontal bar and a **numeric value** below it
+   (e.g. `2.32`).  Note this number.
+5. Repeat with each genuine sample.  Note the lowest and highest values you see.
+
+#### PMV Pro
+
+1. Power on and place the sample on both probes.
+2. The device shows a **Basic** bar reading, then a **Thru** bar reading.
+   Each screen shows a numeric value (e.g. `1.71`).
+3. Note the numeric value — not the LED colour, but the actual number shown.
+4. Repeat across several genuine pieces and record the full range (min and max).
+
+#### PMV Standard
+
+1. Place the sample on the probes.
+2. The display steps through Basic and Thru verification screens in sequence,
+   each showing a bar and a numeric reading.
+3. Note the reading from each screen and record the range across all your
+   genuine samples.
+
+#### PMV Mini
+
+1. Place the sample flat on the probe surface.
+2. Wait for the reading to stabilise (stops changing).
+3. Note the numeric value shown on or beside the bar.
+4. Repeat for each genuine sample and record the lowest and highest values.
+
+---
+
+### Wizard steps
+
+Select `n` from the main menu.  The wizard proceeds through five steps.
+
+**Step 1 — Metal name**
+
+Enter the label exactly as you want it to appear on the device display when
+this metal is tested (e.g. `.999`, `18k Yellow`, `Maple Leaf 1oz`).
+Keep it short — long names may be truncated on the device screen.
+
+**Step 2 — Category**
+
+Choose which group this metal belongs to:
+
+```
+0 = Gold          — all gold alloys and gold-plated items
+1 = Silver        — all silver alloys
+2 = Other         — platinum, palladium, rhodium, copper, calibrators, etc.
+3 = Coins/Bullion — specific named coins where size and weight are also checked
+```
+
+**Step 3 — Internal parameter (ResGreenLeft)**
+
+`ResGreenLeft` is an internal device value that operates on a completely
+different scale (roughly 350–2200) and is never shown on the display.
+Because it cannot be read from the device, you copy it from the most similar
+existing record.  The wizard lists all existing records grouped by category
+with their `ResGreenLeft` values so you can choose.
+
+Rules of thumb:
+- New gold alloy → copy from the gold record closest in purity.
+- New silver alloy → copy from the silver record closest in purity.
+- New coin → copy from a coin of the same base metal.
+- No similar record exists → copy the nearest match and use `e` to fine-tune
+  later if the device does not respond as expected.
+
+**Step 4 — Measurement bar thresholds**
+
+Enter the **lowest** and **highest** bar readings you observed across all your
+genuine samples.  The wizard uses these to set the green (pass) zone:
+
+```
+ResYellowLeft  = lowest  × 0.93   ← outer left boundary (below = red/fail)
+ResGreenRight  = lowest            ← green zone starts here
+ResYellowRight = highest           ← green zone ends here
+Field5         = highest × 1.07   ← outer right boundary (above = red/fail)
+```
+
+The 7 % margin on each side creates the yellow caution zone.  A reading there
+means "close to the genuine range but not firmly within it".  You can change
+the margin percentage at this step if you want a wider or narrower buffer.
+
+If you only have one genuine sample, use the same value for both lowest and
+highest.  The wizard will still apply the margin to create a caution zone.
+
+**Step 5 — Specific gravity and tolerances**
+
+*Specific gravity* is the density of the metal relative to water (pure water
+= 1.0).  Gold at 19.3 g/cm³ is about 19.3 times denser than water.  The
+device uses this value in its hydrostatic weighing mode.
+
+Common reference values:
+
+| Metal | g/cm³ | Metal | g/cm³ |
+|---|---|---|---|
+| Gold | 19.30 | Platinum | 21.45 |
+| Silver | 10.49 | Palladium | 12.02 |
+| Tungsten | 19.25 | Rhodium | 12.41 |
+| Lead | 11.34 | Copper | 8.96 |
+
+For alloys, use the published density for that specific composition
+(e.g. 18k yellow gold ≈ 15.5 g/cm³, 14k yellow gold ≈ 13.1 g/cm³).
+
+*Dimension tolerances* (`DimensionModePlusTolerance` and
+`DimensionModeMinusTolerance`) and the *weight multiplier*
+(`TotalWeightMultiplier`) are only relevant in Dimension/Coin mode, where the
+device checks that the physical size and weight of a sample match the record.
+For standard resistivity testing these values have no effect.  The wizard
+defaults them from the nearest same-category existing record; press Enter to
+accept the defaults unless you are adding a coin record that needs precise
+size and weight limits.
+
+**Confirmation**
+
+A full summary of every field is shown before the record is added.  Confirm
+with `y`, then use `s` to save the database file.
+
+---
+
+### Tips for better results
+
+- **Clean contacts** — wipe both the sample and the probe contacts before
+  measuring.  Oxidation or debris shifts readings.
+- **Consistent placement** — lay the sample flat with firm, even contact on
+  both probes.  Tilted or partial contact causes unstable readings.
+- **Wait for stability** — the readout may fluctuate for a second after
+  placement.  Note the value only once it has settled.
+- **More samples is better** — a single piece gives you one data point; five
+  pieces show the natural spread of the genuine range.
+- **Test with a known fake** — after loading the new database onto the device,
+  test against a known counterfeit if available.  A correctly set record will
+  show red or yellow for the fake and green for genuine pieces.
+- **Use `c` then `e` as an alternative** — if the new metal is very similar
+  to one already in the database, duplicating that record with `c` and
+  adjusting only the differing fields with `e` can be faster than the wizard.
+- **Save frequently** — each save automatically backs up the original file, so
+  you can always recover it if something goes wrong.
 
 ---
 
@@ -120,7 +343,6 @@ python pmv_editor.py [options] [file.dat]
 |---|---|
 | *(no arguments)* | Prompts you to enter a `.dat` file path |
 | `file.dat` | Opens the specified `.dat` file |
-| `--new [file.dat]` | Creates a blank database (default name: `new_database.dat`) |
 | `--extract-key exe` | Extracts the AES key and IV from the downloader `.exe` |
 | `--use-key KEY IV` | Uses the given hex key and IV instead of the built-in values |
 
@@ -187,15 +409,23 @@ Each precious metal record contains these fields:
 |---|---|
 | `name` | Metal name shown on the device display, e.g. `.999` |
 | `category_id` | 0 = Gold, 1 = Silver, 2 = Other, 3 = Coins/Bullion |
-| `ResGreenLeft` | Resistance threshold, green LED, left probe |
-| `ResYellowLeft` | Resistance threshold, yellow LED, left probe |
-| `ResGreenRight` | Resistance threshold, green LED, right probe |
-| `ResYellowRight` | Resistance threshold, yellow LED, right probe |
-| `Field5` | Device-internal value (exact purpose not fully documented) |
+| `ResGreenLeft` | Internal device parameter (scale ~350–2200, not shown on display) |
+| `ResYellowLeft` | Outer left boundary of the bar — below this is the red (fail) zone |
+| `ResGreenRight` | Left edge of the green (pass) zone |
+| `ResYellowRight` | Right edge of the green (pass) zone |
+| `Field5` | Outer right boundary of the bar — above this is the red (fail) zone |
 | `SpecificGravity` | Specific gravity of the metal in g/cm³ |
-| `DimensionModePlusTolerance` | Upper size tolerance in dimension mode |
-| `DimensionModeMinusTolerance` | Lower size tolerance in dimension mode |
+| `DimensionModePlusTolerance` | Upper size tolerance for dimension mode |
+| `DimensionModeMinusTolerance` | Lower size tolerance for dimension mode |
 | `TotalWeightMultiplier` | Multiplier applied to the total weight reading |
+
+The four bar thresholds define the zone layout as follows:
+
+```
+  Red (fail)  |  Yellow (caution)  |  Green (pass)  |  Yellow (caution)  |  Red (fail)
+              ↑                    ↑                 ↑                    ↑
+        ResYellowLeft        ResGreenRight     ResYellowRight           Field5
+```
 
 ---
 
@@ -234,8 +464,34 @@ byte length is stored as a variable-length prefix where each byte contributes
 
 ## If the encryption key changes
 
-Sigma Metalytics may update the key in a future release of their downloader
-software.  To extract the new key automatically:
+### Recognising the problem
+
+If the key has changed, the tool will fail to open any `.dat` file and display
+the following error:
+
+```
+  ERROR: Failed to decrypt or parse the database file.
+
+  The most likely cause is that Sigma Metalytics has released a new
+  version of their downloader with a different AES encryption key.
+
+  To fix this:
+    1. Download the latest installer from:
+       https://www.sigmametalytics.com/pages/database-updaters
+    2. Extract InvestorDatabaseDownloader.exe from the installer.
+    3. Run:
+         python pmv_editor.py --extract-key InvestorDatabaseDownloader.exe
+       This will update pmv_key.json automatically.
+    4. Then open your .dat file again.
+
+  If the problem persists, the file may be corrupted or not a valid
+  PMV database file.
+```
+
+### Updating the key
+
+Sigma Metalytics may update the AES key in a future release of their downloader
+software.  The tool handles this automatically:
 
 1. Download the new installer from the Sigma Metalytics website.
 2. Extract `InvestorDatabaseDownloader.exe` from the installer.
@@ -243,10 +499,27 @@ software.  To extract the new key automatically:
    ```bash
    python pmv_editor.py --extract-key InvestorDatabaseDownloader.exe
    ```
-4. If the key has changed, the tool will display the new values and offer to
-   apply them for the current session.
-5. To make the change permanent, update the `KEY` and `IV` constants near the
-   top of `pmv_editor.py`.
+4. If the key has changed, the tool writes the new values to `pmv_key.json`
+   (stored next to `pmv_editor.py`) and immediately uses them.  No manual
+   editing of any file is required.
+5. All future sessions load the key from `pmv_key.json` automatically.
+
+### The key file (`pmv_key.json`)
+
+The key and IV are stored in a small JSON file in the same directory as the
+script:
+
+```json
+{
+  "key": "32392013ded44052ae296db75bf03377",
+  "iv":  "774abcf022b64aa193d519726f0144bd"
+}
+```
+
+- If `pmv_key.json` is present, it takes priority over the built-in defaults.
+- If it is missing (e.g. on a fresh install), the built-in defaults are used.
+- The file is listed in `.gitignore` and should not be committed to version
+  control, since each user should generate their own by running `--extract-key`.
 
 ### How key extraction works
 
