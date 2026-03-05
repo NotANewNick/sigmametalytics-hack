@@ -3,6 +3,32 @@
 A Python tool for reading, editing, and creating the encrypted `.dat` database
 files used by **Sigma Metalytics Precious Metal Verifier (PMV)** devices.
 
+---
+
+## TL;DR — Quick start
+
+```bash
+pip install pycryptodome
+```
+
+1. Download your device's latest `.dat` file from the
+   [Sigma Metalytics database updater page](https://www.sigmametalytics.com/pages/database-updaters).
+2. Open it:
+   ```bash
+   python pmv_editor.py "Invest 1.15.dat"
+   ```
+3. Use the menu — press `n` to add a new metal (guided wizard), `e` to edit an
+   existing one, `l` to list all records.
+4. Press `s` to save.  A backup of the original file is created automatically.
+5. Load the saved `.dat` file onto your device using the Sigma Metalytics
+   updater software as normal.
+
+> **Important:** the `.dat` file is a full replacement — it overwrites
+> everything on the device.  Always start from the official downloaded file,
+> not a blank one, so the factory records are preserved.
+
+---
+
 Supported devices:
 
 | Device | Database filename |
@@ -244,13 +270,17 @@ Choose which group this metal belongs to:
 3 = Coins/Bullion — specific named coins where size and weight are also checked
 ```
 
-**Step 3 — Internal parameter (ResGreenLeft)**
+**Step 3 — Green zone left offset (ResGreenLeft)**
 
-`ResGreenLeft` is an internal device value that operates on a completely
-different scale (roughly 350–2200) and is never shown on the display.
-Because it cannot be read from the device, you copy it from the most similar
-existing record.  The wizard lists all existing records grouped by category
-with their `ResGreenLeft` values so you can choose.
+`ResGreenLeft` defines how far from the left edge of the measurement bar the
+green (pass) zone begins.  It is stored in a different scale to the resistance
+readings shown on the display (roughly 350–2200 vs. the 1–20 range of the bar
+readings), so its value cannot be read directly off the device screen.
+
+The best approach is to copy it from the most physically similar existing
+record — a metal whose green zone starts at roughly the same position on the
+bar.  The wizard lists all existing records grouped by category with their
+`ResGreenLeft` values so you can choose.
 
 Rules of thumb:
 - New gold alloy → copy from the gold record closest in purity.
@@ -409,7 +439,7 @@ Each precious metal record contains these fields:
 |---|---|
 | `name` | Metal name shown on the device display, e.g. `.999` |
 | `category_id` | 0 = Gold, 1 = Silver, 2 = Other, 3 = Coins/Bullion |
-| `ResGreenLeft` | Internal device parameter (scale ~350–2200, not shown on display) |
+| `ResGreenLeft` | Offset from the left edge of the bar to where the green zone starts (scale ~350–2200) |
 | `ResYellowLeft` | Outer left boundary of the bar — below this is the red (fail) zone |
 | `ResGreenRight` | Left edge of the green (pass) zone |
 | `ResYellowRight` | Right edge of the green (pass) zone |
@@ -425,6 +455,9 @@ The four bar thresholds define the zone layout as follows:
   Red (fail)  |  Yellow (caution)  |  Green (pass)  |  Yellow (caution)  |  Red (fail)
               ↑                    ↑                 ↑                    ↑
         ResYellowLeft        ResGreenRight     ResYellowRight           Field5
+
+  ResGreenLeft — separate value: offset from the left edge of the bar
+                 to the start of the green zone (different scale, ~350–2200)
 ```
 
 ---
