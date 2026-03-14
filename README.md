@@ -3,9 +3,11 @@
 A Python tool for reading, editing, and creating the encrypted `.dat` database
 files used by **Sigma Metalytics Precious Metal Verifier (PMV)** devices. [https://www.sigmametalytics.com](https://www.sigmametalytics.com)
 
+<img src="image.png" width="350" title="hover text">
 ---
 
 ## TL;DR — Quick start
+**Curently this method does not support past 49 items in the database!**
 
 ```bash
 pip install pycryptodome
@@ -62,6 +64,8 @@ high-value transactions.  Use this tool at your own risk.
 
 > **Warning — loading a modified `.dat` file onto your PMV device will
 > completely erase and replace the device's existing database.**
+
+**Curently this method does not support past 49 items in the database!**
 
 The `.dat` file is not a patch or a set of updates — it is the entire database
 in one file.  When the device loads a new file, every record that was
