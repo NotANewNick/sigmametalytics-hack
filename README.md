@@ -1,3 +1,6 @@
+Read this first.
+[https://www.sigmametalytics.com/pages/security-update-announcement](https://www.sigmametalytics.com/pages/security-update-announcement)
+
 # PMV Database Editor
 
 A Python tool for reading, editing, and creating the encrypted `.dat` database
